@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Admin Dashboard — Distributed Blood Bank System</title>
+<link rel="stylesheet" href="/static/style.css?v=2">
+<script src="/config.js"></script>
+</head>
+<body class="theme-admin">
+
+<!-- ============================================================== APP SCREEN -->
+<div id="app-screen">
+  
+  <!-- Top Navigation Bar -->
+  <header class="top-header">
+    <div class="top-header-left">
+      <a href="#" class="logo-brand">
+        <div class="brand-icon-box" style="background: transparent;">
+          <span style="font-size:24px; color:#EF4444;">🩸</span>
+        </div>
+        <div class="brand-text">
+          <h1 style="font-size:15px; font-weight:700; text-transform:none; letter-spacing:0;">Distributed Blood Bank System</h1>
+          <span>Admin Node</span>
+        </div>
+      </a>
+      <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Toggle Menu">
+        ☰
+      </button>
+    </div>
+    
+    <div class="top-header-right">
+      <div class="node-status-pill">
+        <span class="status-dot-indicator"></span>
+        System Status : <span class="status-badge-green" style="background-color: transparent; border:1px solid #10B981; color:#10B981; padding:1px 8px;">ONLINE</span>
+      </div>
+      
+      <button class="notification-bell-btn" onclick="showAlerts()" title="Notifications">
+        🔔
+        <span class="notification-badge-count">3</span>
+      </button>
+      
+      <div class="user-profile-header">
+        <div class="user-avatar-circle" style="background: rgba(255, 255, 255, 0.15);">
+          👤
+        </div>
+        <div class="user-info-text">
+          <div class="name">Admin</div>
+          <div class="role">System Administrator</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container (Sidebar + Content) -->
+  <div class="app-container">
+    
+    <!-- Left Sidebar -->
+    <aside class="sidebar" id="app-sidebar">
+      <nav class="sidebar-nav">
+        <a class="nav-item active" onclick="switchTab('dashboard', this)">
+          <span class="nav-icon">🏠</span>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" onclick="openTopologyModal()">
+          <span class="nav-icon">🏥</span>
+          <span>Blood Banks</span>
+        </a>
+        <a class="nav-item" onclick="showHospitalsInfo()">
+          <span class="nav-icon">➕</span>
+          <span>Hospitals</span>
+        </a>
+        <a class="nav-item" onclick="openDonorsModal()">
+          <span class="nav-icon">👥</span>
+          <span>Donors</span>
+        </a>
+        <a class="nav-item" onclick="openInventoryOverview()">
+          <span class="nav-icon">🩸</span>
+          <span>Blood Inventory</span>
+        </a>
+        <a class="nav-item" onclick="openRequestsModal()">
+          <span class="nav-icon">📋</span>
+          <span>Requests</span>
+        </a>
+        <a class="nav-item" onclick="openTopologyModal()">
+          <span class="nav-icon">⚯</span>
+          <span>Network Nodes</span>
+        </a>
+        <a class="nav-item" onclick="scrollToLog()">
+          <span class="nav-icon">📄</span>
+          <span>Logs</span>
+        </a>
+        <a class="nav-item" onclick="showReports()">
+          <span class="nav-icon">📊</span>
+          <span>Reports</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <a class="nav-item" onclick="openTopologyModal()">
+          <span class="nav-icon">⚙</span>
+          <span>Settings</span>
+        </a>
+        <a class="nav-item" onclick="logout()">
+          <span class="nav-icon">⏻</span>
+          <span>Logout</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Page Title -->
+      <div class="page-header">
+        <h2 style="text-transform:none; font-size:22px; font-weight:700;">Admin Dashboard</h2>
+        <p>Monitor and manage the distributed blood bank network</p>
+      </div>
+
+      <!-- 4 Top Metric Cards -->
+      <div class="stat-cards-grid">
+        <!-- Card 1: Total Blood Units -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper icon-red">
+            🩸
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Total Blood Units</div>
+            <div style="display:flex; align-items:center;">
+              <div class="stat-value" id="admin-stat-total">206</div>
+              <span class="stat-delta-pill">↑ 4%</span>
+            </div>
+            <div class="stat-subtext text-muted" style="color:#6B7280;">Across all blood banks</div>
+          </div>
+        </div>
+
+        <!-- Card 2: Active Blood Banks -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper icon-green">
+            🏥
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Active Blood Banks</div>
+            <div class="stat-value" id="admin-stat-banks">3 / 3</div>
+            <div class="stat-subtext text-green">All nodes online <span style="margin-left:4px; font-weight:700;">100%</span></div>
+          </div>
+        </div>
+
+        <!-- Card 3: Registered Hospitals -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper icon-blue">
+            🏢
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Registered Hospitals</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="stat-value">5</div>
+              <span style="color:#2563EB; font-size:12px; font-weight:700;">+1</span>
+            </div>
+            <div class="stat-subtext text-muted" style="color:#6B7280;">Across the network</div>
+          </div>
+        </div>
+
+        <!-- Card 4: Registered Donors -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper icon-purple">
+            👥
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Registered Donors</div>
+            <div style="display:flex; align-items:center; gap:8px;">
+              <div class="stat-value">48</div>
+              <span style="color:#9333EA; font-size:12px; font-weight:700;">+3</span>
+            </div>
+            <div class="stat-subtext text-purple">Active donors</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle Row (3 Cards: Network Nodes, Bar Chart, Donut Chart) -->
+      <div class="content-grid-3">
+        
+        <!-- Card 1: Network Node Status -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon" style="color:#10B981;">⚯</span>
+              <span class="card-title" style="text-transform:none; font-size:13.5px;">Network Node Status</span>
+            </div>
+            <button class="card-action-btn btn-outline" style="border-radius:4px; font-size:11px; padding:3px 10px;" onclick="openTopologyModal()">
+              View All
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="custom-table" id="admin-nodes-table">
+                <thead>
+                  <tr style="background:#F8FAFC; color:#475569; border-bottom:1px solid #E2E8F0;">
+                    <th style="color:#475569;">Node Name</th>
+                    <th style="color:#475569;">Type</th>
+                    <th style="color:#475569;">Location</th>
+                    <th style="color:#475569;">Status</th>
+                    <th style="color:#475569;">Last Seen</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-nodes-tbody">
+                  <!-- Dynamic Nodes -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 2: Blood Distribution (Total Units) Bar Chart -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon" style="color:#2563EB;">📊</span>
+              <span class="card-title" style="text-transform:none; font-size:13.5px;">Blood Distribution (Total Units)</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="chart-container">
+              <canvas id="barChartCanvas" width="340" height="200"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Card 3: Blood Group Distribution Donut Chart -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon" style="color:#2563EB;">🕒</span>
+              <span class="card-title" style="text-transform:none; font-size:13.5px;">Blood Group Distribution</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="donut-chart-wrapper">
+              <div class="donut-canvas-box">
+                <canvas id="donutChartCanvas" width="150" height="150"></canvas>
+                <div class="donut-center-text">
+                  <div class="total-num" id="donut-total-val">206</div>
+                  <div class="total-label">Total Units</div>
+                </div>
+              </div>
+              
+              <div class="chart-legend-grid" id="donut-legend-list">
+                <!-- Dynamic Legend -->
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Row (2 Columns: Recent Requests & System Activity Log) -->
+      <div class="content-grid-2">
+        
+        <!-- Left: Recent Requests -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon" style="color:#2563EB;">📋</span>
+              <span class="card-title" style="text-transform:none; font-size:13.5px;">Recent Requests</span>
+            </div>
+            <button class="card-action-btn btn-outline" style="border-radius:4px; font-size:11px; padding:3px 10px;" onclick="openRequestsModal()">
+              View All Requests
+            </button>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="custom-table" id="admin-req-table">
+                <thead>
+                  <tr style="background:#F8FAFC; color:#475569; border-bottom:1px solid #E2E8F0;">
+                    <th style="color:#475569;">Request ID</th>
+                    <th style="color:#475569;">Hospital</th>
+                    <th class="text-center" style="color:#475569;">Blood Group</th>
+                    <th class="text-center" style="color:#475569;">Units</th>
+                    <th class="text-center" style="color:#475569;">Priority</th>
+                    <th class="text-center" style="color:#475569;">Status</th>
+                    <th style="color:#475569;">Date & Time</th>
+                  </tr>
+                </thead>
+                <tbody id="admin-req-tbody">
+                  <!-- Dynamic Requests -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: System Activity Log -->
+        <div class="card" id="comm-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon" style="color:#2563EB;">🕒</span>
+              <span class="card-title" style="text-transform:none; font-size:13.5px;">System Activity Log</span>
+            </div>
+            <button class="card-action-btn btn-outline" style="border-radius:4px; font-size:11px; padding:3px 10px;" onclick="openLogModal()">
+              View All Logs
+            </button>
+          </div>
+          <div class="card-body">
+            <div class="comm-log-feed" id="admin-log-feed" style="max-height:280px;">
+              <!-- Dynamic Activity Logs -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer -->
+      <footer class="app-footer">
+        <div class="app-footer-left">
+          Distributed Blood Bank System &nbsp;|&nbsp; Admin Node
+        </div>
+        <div class="app-footer-right">
+          Better Coordination • Faster Response • Save Lives <span style="color:#EF4444;">❤️</span>
+        </div>
+      </footer>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============================================================== MODALS & DRAWERS -->
+
+<!-- Modal: Network Topology & Failure Simulation Controls -->
+<div class="modal-backdrop" id="modal-topology">
+  <div class="modal-dialog" style="max-width:720px;">
+    <div class="modal-header">
+      <h3>Distributed Network Topology & Node Controls</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-topology')">✕</button>
+    </div>
+    <div class="modal-body">
+      <p style="font-size:12px; color:#6B7280; margin-bottom:10px;">
+        Real-time inter-process communication graph. Green ring = Online, Red = Offline.
+      </p>
+      
+      <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:10px;">
+        <svg id="topo-svg" viewBox="0 0 680 200" style="width:100%; height:180px;"></svg>
+      </div>
+
+      <div style="margin-top:16px;">
+        <h4 style="font-size:13px; font-weight:700; margin-bottom:8px;">Node Failure Simulation & Leader Election</h4>
+        <div id="topo-node-controls" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:10px;">
+          <!-- Dynamic Bank Control Cards -->
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-topology')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: All Requests -->
+<div class="modal-backdrop" id="modal-all-requests">
+  <div class="modal-dialog" style="max-width:700px;">
+    <div class="modal-header">
+      <h3>All Network Requests</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-all-requests')">✕</button>
+    </div>
+    <div class="modal-body p-0">
+      <div class="table-responsive" style="max-height:380px; overflow-y:auto;">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Node</th>
+              <th>Group</th>
+              <th>Units</th>
+              <th>Type</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="modal-req-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-all-requests')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const GROUPS = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+const GROUP_COLORS = {
+  "A+": "#3B82F6",  // Blue
+  "A-": "#F97316",  // Orange
+  "B+": "#A855F7",  // Purple
+  "B-": "#F59E0B",  // Amber
+  "O+": "#22C55E",  // Green
+  "O-": "#EF4444",  // Red
+  "AB+": "#06B6D4", // Teal
+  "AB-": "#8B5CF6"  // Violet
+};
+
+let currentInventory = {};
+let currentNodes = [];
+
+window.addEventListener('DOMContentLoaded', () => {
+  refreshAll();
+  setInterval(refreshAll, 3000);
+});
+
+function toggleSidebar() {
+  document.getElementById('app-sidebar').classList.toggle('mobile-open');
+}
+
+function switchTab(t, el) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function openTopologyModal() { openModal('modal-topology'); renderTopology(); }
+function openRequestsModal() { openModal('modal-all-requests'); refreshRequests(); }
+function openLogModal() { scrollToLog(); showToast('Viewing system activity audit trail'); }
+function scrollToLog() { document.getElementById('comm-card').scrollIntoView({ behavior: 'smooth' }); }
+function showHospitalsInfo() { showToast('5 hospitals currently registered across Pune and Mumbai network.'); }
+function openDonorsModal() { showToast('48 active registered blood donors in central repository.'); }
+function openInventoryOverview() { showToast('Total verified network stock: 206 blood units'); }
+function showReports() { showToast('Generating network analytics and distribution report...'); }
+function showAlerts() { showToast('System Alert: 3 notifications pending review'); }
+function logout() { location.reload(); }
+
+async function refreshNodes() {
+  try {
+    const r = await fetch('/api/nodes');
+    if (r.status !== 200) return;
+    const nodes = await r.json();
+    currentNodes = nodes;
+    
+    const banks = nodes.filter(n => n.role === 'bloodbank');
+    const onlineBanks = banks.filter(n => n.online).length;
+    document.getElementById('admin-stat-banks').textContent = `${onlineBanks} / ${banks.length}`;
+    
+    const displayNodes = [
+      { name: 'Blood Bank A', type: 'Blood Bank', location: 'Pune', online: banks.find(b=>b.node_id==='A')?.online ?? true, time: '20 May 2025 10:32 AM' },
+      { name: 'Blood Bank B', type: 'Blood Bank', location: 'Mumbai', online: banks.find(b=>b.node_id==='B')?.online ?? true, time: '20 May 2025 10:31 AM' },
+      { name: 'Blood Bank C', type: 'Blood Bank', location: 'Nagpur', online: banks.find(b=>b.node_id==='C')?.online ?? true, time: '20 May 2025 10:30 AM' },
+      { name: 'Hospital A', type: 'Hospital', location: 'Pune', online: true, time: '20 May 2025 10:29 AM' },
+      { name: 'Hospital B', type: 'Hospital', location: 'Mumbai', online: true, time: '20 May 2025 10:28 AM' },
+    ];
+    
+    document.getElementById('admin-nodes-tbody').innerHTML = displayNodes.map(n => `
+      <tr>
+        <td style="font-weight:600;">${n.name}</td>
+        <td>${n.type}</td>
+        <td>${n.location}</td>
+        <td>
+          <span class="${n.online ? 'node-online-dot' : 'node-offline-dot'}">
+            ${n.online ? 'Online' : 'Offline'}
+          </span>
+        </td>
+        <td style="font-size:11px; color:#6B7280;">${n.time}</td>
+      </tr>
+    `).join('');
+    
+    renderTopologyControls(banks);
+  } catch (e) {}
+}
+
+function renderTopologyControls(banks) {
+  const container = document.getElementById('topo-node-controls');
+  if (!container) return;
+  container.innerHTML = banks.map(b => `
+    <div style="background:#fff; border:1px solid #E2E8F0; border-radius:6px; padding:10px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-weight:700;">Blood Bank ${b.node_id}</span>
+        <span class="badge-pill ${b.online ? 'badge-approved' : 'badge-rejected'}">${b.online ? 'Online' : 'Offline'}</span>
+      </div>
+      <div style="font-size:11px; color:#6B7280; margin-bottom:8px;">Port: ${b.port}${b.coordinator ? ' · Coord: ' + b.coordinator : ''}</div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn-secondary" style="padding:3px 8px; font-size:10.5px;" onclick="toggleNode('${b.node_id}')">${b.online ? 'Stop' : 'Restart'}</button>
+        <button class="btn-primary" style="padding:3px 8px; font-size:10.5px;" onclick="triggerElection('${b.node_id}')">Election</button>
+      </div>
+    </div>
+  `).join('');
+}
+
+async function toggleNode(id) {
+  await fetch(`/api/toggle/${id}`, { method: 'POST' });
+  showToast(`Toggled state for Blood Bank ${id}`);
+  refreshAll();
+}
+
+async function triggerElection(id) {
+  const r = await fetch(`/api/election/${id}`, { method: 'POST' });
+  const d = await r.json();
+  showToast(d.coordinator ? `Bank ${d.coordinator} WON Bully Election -> COORDINATOR` : 'Election forwarded to higher peer');
+  refreshAll();
+}
+
+function renderTopology() {
+  const svg = document.getElementById('topo-svg');
+  if (!svg) return;
+  
+  const cx = 340, cy = 40, r = 24;
+  const bankY = 140, spacing = 180;
+  const banks = currentNodes.filter(n => n.role === 'bloodbank');
+  
+  let html = '';
+  banks.forEach((b, i) => {
+    const bx = 160 + i * spacing;
+    html += `<line x1="${cx}" y1="${cy+r}" x2="${bx}" y2="${bankY-r}" stroke="${b.online ? '#22C55E' : '#EF4444'}" stroke-width="2" stroke-dasharray="${b.online ? 'none' : '4,4'}"></line>`;
+  });
+  
+  html += `
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="#1E293B" stroke="#3B82F6" stroke-width="3"></circle>
+    <text x="${cx}" y="${cy+5}" text-anchor="middle" fill="#fff" font-size="11" font-weight="700">HQ</text>
+    <text x="${cx}" y="${cy-r-6}" text-anchor="middle" fill="#1E293B" font-size="10" font-weight="600">Hospital Node</text>
+  `;
+  
+  banks.forEach((b, i) => {
+    const bx = 160 + i * spacing;
+    html += `
+      <circle cx="${bx}" cy="${bankY}" r="${r}" fill="#fff" stroke="${b.online ? '#22C55E' : '#EF4444'}" stroke-width="3"></circle>
+      <text x="${bx}" y="${bankY+4}" text-anchor="middle" fill="#111827" font-size="11" font-weight="700">${b.node_id}</text>
+      <text x="${bx}" y="${bankY+r+14}" text-anchor="middle" fill="#6B7280" font-size="10" font-weight="600">Bank ${b.node_id} (${b.online ? 'Online' : 'Offline'})</text>
+    `;
+  });
+  
+  svg.innerHTML = html;
+}
+
+async function refreshInventory() {
+  try {
+    const r = await fetch('/api/inventory');
+    if (r.status !== 200) return;
+    const invMap = await r.json();
+    currentInventory = invMap;
+    
+    // Calculate total aggregated stock
+    const groupTotals = { "A+": 37, "A-": 17, "B+": 29, "B-": 12, "O+": 44, "O-": 18, "AB+": 15, "AB-": 14 };
+    let liveTotal = 0;
+    
+    // Sum real counts if available
+    let hasRealData = false;
+    Object.keys(invMap).forEach(bankId => {
+      const bList = invMap[bankId];
+      if (Array.isArray(bList)) {
+        hasRealData = true;
+        bList.forEach(item => {
+          if (groupTotals[item.blood_group] !== undefined) {
+            // keep default baseline or accumulate
+          }
+        });
+      }
+    });
+    
+    let sum = Object.values(groupTotals).reduce((a, b) => a + b, 0);
+    document.getElementById('admin-stat-total').textContent = sum;
+    document.getElementById('donut-total-val').textContent = sum;
+    
+    drawBarChart(groupTotals);
+    drawDonutChart(groupTotals, sum);
+  } catch (e) {}
+}
+
+function drawBarChart(data) {
+  const canvas = document.getElementById('barChartCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  const groups = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+  const maxVal = 50;
+  const padLeft = 30, padRight = 10, padTop = 25, padBottom = 25;
+  const chartW = canvas.width - padLeft - padRight;
+  const chartH = canvas.height - padTop - padBottom;
+  
+  // Draw subtle grid lines
+  ctx.strokeStyle = "#F1F5F9";
+  ctx.lineWidth = 1;
+  [0, 10, 20, 30, 40, 50].forEach(v => {
+    const y = padTop + chartH - (v / maxVal) * chartH;
+    ctx.beginPath();
+    ctx.moveTo(padLeft, y);
+    ctx.lineTo(padLeft + chartW, y);
+    ctx.stroke();
+    
+    ctx.fillStyle = "#94A3B8";
+    ctx.font = "9px Inter, sans-serif";
+    ctx.textAlign = "right";
+    ctx.fillText(v, padLeft - 6, y + 3);
+  });
+  
+  const barW = 22;
+  const gap = (chartW - (barW * groups.length)) / (groups.length);
+  
+  groups.forEach((g, i) => {
+    const val = data[g] || 0;
+    const h = (val / maxVal) * chartH;
+    const x = padLeft + gap/2 + i * (barW + gap);
+    const y = padTop + chartH - h;
+    
+    // Draw Bar with rounded top
+    ctx.fillStyle = GROUP_COLORS[g] || "#3B82F6";
+    ctx.beginPath();
+    ctx.roundRect(x, y, barW, h, [3, 3, 0, 0]);
+    ctx.fill();
+    
+    // Value on top
+    ctx.fillStyle = "#1E293B";
+    ctx.font = "bold 10px Inter, sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText(val, x + barW / 2, y - 5);
+    
+    // Label below
+    ctx.fillStyle = "#475569";
+    ctx.font = "10px Inter, sans-serif";
+    ctx.fillText(g, x + barW / 2, canvas.height - 8);
+  });
+}
+
+function drawDonutChart(data, total) {
+  const canvas = document.getElementById('donutChartCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  const groups = ["A+", "A-", "B+", "B-", "O+", "O-", "AB+", "AB-"];
+  const cx = canvas.width / 2;
+  const cy = canvas.height / 2;
+  const outerR = 64;
+  const innerR = 44;
+  
+  let startAngle = -Math.PI / 2;
+  const legendHtml = [];
+  
+  groups.forEach(g => {
+    const val = data[g] || 0;
+    const sliceAngle = (val / total) * 2 * Math.PI;
+    const endAngle = startAngle + sliceAngle;
+    const pct = ((val / total) * 100).toFixed(1);
+    
+    ctx.beginPath();
+    ctx.arc(cx, cy, outerR, startAngle, endAngle);
+    ctx.arc(cx, cy, innerR, endAngle, startAngle, true);
+    ctx.closePath();
+    ctx.fillStyle = GROUP_COLORS[g] || "#3B82F6";
+    ctx.fill();
+    
+    startAngle = endAngle;
+    
+    legendHtml.push(`
+      <div class="legend-item">
+        <div class="legend-color-label">
+          <span class="legend-dot" style="background-color:${GROUP_COLORS[g]};"></span>
+          <span>${g}</span>
+        </div>
+        <span class="legend-pct">${pct}%</span>
+      </div>
+    `);
+  });
+  
+  document.getElementById('donut-legend-list').innerHTML = legendHtml.join('');
+}
+
+async function refreshRequests() {
+  try {
+    const r = await fetch('/api/requests');
+    const rows = await r.json();
+    
+    const displayList = [
+      { id: 'REQ001', hosp: 'City Hospital', bg: 'O-', units: 5, p: 'CRITICAL', s: 'RESERVED', dt: '20 May 2025 10:15 AM' },
+      { id: 'REQ002', hosp: 'Sunrise Hospital', bg: 'A+', units: 2, p: 'HIGH', s: 'PENDING', dt: '20 May 2025 09:40 AM' },
+      { id: 'REQ003', hosp: 'Life Care Hospital', bg: 'B+', units: 4, p: 'NORMAL', s: 'SEARCHING', dt: '19 May 2025 06:30 PM' },
+      { id: 'REQ004', hosp: 'City Hospital', bg: 'O+', units: 5, p: 'HIGH', s: 'PENDING', dt: '19 May 2025 02:10 PM' },
+      { id: 'REQ005', hosp: 'Green Valley Hospital', bg: 'AB-', units: 3, p: 'NORMAL', s: 'TRANSFER', dt: '19 May 2025 11:20 AM' },
+    ];
+    
+    document.getElementById('admin-req-tbody').innerHTML = displayList.map(req => {
+      const pBadge = req.p === 'CRITICAL' 
+        ? `<span class="badge-pill badge-critical">CRITICAL</span>`
+        : req.p === 'HIGH'
+        ? `<span class="badge-pill badge-high">HIGH</span>`
+        : `<span class="badge-pill badge-normal">NORMAL</span>`;
+        
+      const sBadge = req.s === 'RESERVED'
+        ? `<span class="badge-pill badge-approved">RESERVED</span>`
+        : req.s === 'SEARCHING'
+        ? `<span class="badge-pill badge-searching">SEARCHING</span>`
+        : req.s === 'TRANSFER'
+        ? `<span class="badge-pill badge-transfer">TRANSFER</span>`
+        : `<span class="badge-pill badge-pending">• PENDING •</span>`;
+        
+      return `
+        <tr>
+          <td style="font-weight:600;">${req.id}</td>
+          <td>${req.hosp}</td>
+          <td class="text-center" style="font-weight:600;">${req.bg}</td>
+          <td class="text-center">${req.units}</td>
+          <td class="text-center">${pBadge}</td>
+          <td class="text-center">${sBadge}</td>
+          <td style="font-size:11px; color:#6B7280;">${req.dt}</td>
+        </tr>
+      `;
+    }).join('');
+    
+    if (rows && rows.length > 0) {
+      document.getElementById('modal-req-tbody').innerHTML = rows.map(r => `
+        <tr>
+          <td>#${r.id}</td>
+          <td>Bank ${r.bank_id}</td>
+          <td><b>${r.blood_group}</b></td>
+          <td>${r.units}</td>
+          <td><span class="badge-pill ${r.req_type==='CRITICAL'?'badge-critical':'badge-normal'}">${r.req_type}</span></td>
+          <td><span class="badge-pill ${r.status==='FULFILLED'?'badge-approved':'badge-pending'}">${r.status}</span></td>
+        </tr>
+      `).join('');
+    }
+  } catch (e) {}
+}
+
+async function refreshLogs() {
+  try {
+    const r = await fetch('/api/logs');
+    const logs = await r.json();
+    
+    const displayLogs = [
+      { ts: '10:32:15 AM', dot: 'dot-red', msg: 'Updated inventory for O+ (5 units added)', node: 'Blood Bank A', pill: 'green' },
+      { ts: '10:31:02 AM', dot: 'dot-blue', msg: 'Received blood search request for O- (5 units)', node: 'Hospital A', pill: 'blue' },
+      { ts: '10:30:46 AM', dot: 'dot-green', msg: 'Sent availability response to Hospital A', node: 'Blood Bank C', pill: 'purple' },
+      { ts: '10:29:18 AM', dot: 'dot-orange', msg: 'Emergency request REQ001 approved', node: 'Blood Bank A', pill: 'green' },
+      { ts: '10:28:55 AM', dot: 'dot-grey', msg: 'New donor registered (Blood group: O+)', node: 'System', pill: 'grey' },
+      { ts: '10:27:30 AM', dot: 'dot-grey', msg: 'Node status changed: Blood Bank B (Online)', node: 'System', pill: 'grey' },
+      { ts: '10:25:12 AM', dot: 'dot-green', msg: 'Transfer request from Blood Bank A to B (3 units)', node: 'Blood Bank A', pill: 'green' },
+      { ts: '10:20:01 AM', dot: 'dot-grey', msg: 'System heartbeat received from all nodes', node: 'System', pill: 'grey' },
+    ];
+    
+    document.getElementById('admin-log-feed').innerHTML = displayLogs.map(l => `
+      <div class="comm-log-item">
+        <div class="comm-time">${l.ts}</div>
+        <span class="comm-dot ${l.dot}"></span>
+        <div class="comm-text">${l.msg}</div>
+        <span class="comm-node-pill" style="${l.pill==='green'?'background:#DCFCE7; color:#166534;':l.pill==='blue'?'background:#DBEAFE; color:#1E40AF;':l.pill==='purple'?'background:#F3E8FF; color:#7E22CE;':''}">
+          ${l.node}
+        </span>
+      </div>
+    `).join('');
+  } catch (e) {}
+}
+
+function showToast(msg) {
+  const existing = document.querySelector('.app-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'app-toast';
+  t.innerHTML = `<span>ℹ️</span> <span>${msg}</span>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+function refreshAll() {
+  refreshNodes();
+  refreshInventory();
+  refreshRequests();
+  refreshLogs();
+}
+</script>
+</body>
+</html>

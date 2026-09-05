@@ -1,0 +1,768 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Blood Bank Node — Distributed Blood Network</title>
+<link rel="stylesheet" href="/static/style.css?v=2">
+<script src="/config.js"></script>
+</head>
+<body class="theme-crimson">
+
+<!-- ============================================================== LOGIN SCREEN -->
+<div id="login-screen" class="login-screen-wrap">
+  <div class="login-card-container">
+    <div class="login-logo-box" style="background-color: #FEE2E2; color: #DC2626;">
+      🩸
+    </div>
+    <h2 id="login-title">Blood Bank Node</h2>
+    <p class="subtitle" id="login-sub">Distributed Blood Network · Node Access</p>
+    
+    <div class="login-form-group">
+      <label>Username</label>
+      <input id="login-user" class="form-input" style="width:100%" autocomplete="off">
+    </div>
+    
+    <div class="login-form-group">
+      <label>Password</label>
+      <input id="login-pass" class="form-input" style="width:100%" type="password" value="password">
+    </div>
+    
+    <button class="login-btn-submit" onclick="login()">Sign In to Terminal</button>
+    <div class="login-demo-hint" id="login-hint">Demo credential — username "a", any password</div>
+  </div>
+</div>
+
+<!-- ============================================================== APP SCREEN -->
+<div id="app-screen" style="display:none">
+  
+  <!-- Top Navigation Bar -->
+  <header class="top-header">
+    <div class="top-header-left">
+      <a href="#" class="logo-brand">
+        <div class="brand-icon-box" style="background: rgba(255,255,255,0.15);">
+          🩸
+        </div>
+        <div class="brand-text">
+          <h1>BLOOD BANK NODE</h1>
+          <span id="hdr-node-sub">Blood Bank A</span>
+        </div>
+      </a>
+      <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Toggle Menu">
+        ☰
+      </button>
+    </div>
+    
+    <div class="top-header-right">
+      <div class="node-status-pill">
+        Node Status : <span class="status-badge-green" id="self-state-pill">ONLINE</span>
+      </div>
+      
+      <div class="user-profile-header">
+        <div class="user-avatar-circle">
+          👤
+        </div>
+        <div class="user-info-text">
+          <div class="name" id="user-display-name">BB_A_Officer</div>
+          <div class="role">Blood Bank Officer</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container (Sidebar + Content) -->
+  <div class="app-container">
+    
+    <!-- Left Sidebar -->
+    <aside class="sidebar" id="app-sidebar">
+      <nav class="sidebar-nav">
+        <a class="nav-item active" onclick="switchTab('dashboard', this)">
+          <span class="nav-icon">🏠</span>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" onclick="openInventoryModal()">
+          <span class="nav-icon">🩸</span>
+          <span>Blood Inventory</span>
+        </a>
+        <a class="nav-item" onclick="openRequestsModal()">
+          <span class="nav-icon">📋</span>
+          <span>Requests</span>
+          <span class="nav-badge" id="sidebar-req-badge">4</span>
+        </a>
+        <a class="nav-item" onclick="openTransferModal()">
+          <span class="nav-icon">⇄</span>
+          <span>Transfer Requests</span>
+        </a>
+        <a class="nav-item" onclick="openAddModal()">
+          <span class="nav-icon">➕</span>
+          <span>Add Blood Units</span>
+        </a>
+        <a class="nav-item" onclick="showReservedInfo()">
+          <span class="nav-icon">🔖</span>
+          <span>Issued / Reserved</span>
+        </a>
+        <a class="nav-item" onclick="showExpiringInfo()">
+          <span class="nav-icon">⏰</span>
+          <span>Expiring Soon</span>
+        </a>
+        <a class="nav-item" onclick="scrollToLog()">
+          <span class="nav-icon">💬</span>
+          <span>Communication Log</span>
+        </a>
+        <a class="nav-item" onclick="openOtherNodesModal()">
+          <span class="nav-icon">⚯</span>
+          <span>Other Nodes</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <a class="nav-item" onclick="showProfile()">
+          <span class="nav-icon">👤</span>
+          <span>Profile</span>
+        </a>
+        <a class="nav-item" onclick="logout()">
+          <span class="nav-icon">⏻</span>
+          <span>Logout</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Page Title -->
+      <div class="page-header">
+        <h2>DASHBOARD</h2>
+        <p id="welcome-sub">Welcome to Blood Bank Node - Blood Bank A</p>
+      </div>
+
+      <!-- 4 Top Metric Cards -->
+      <div class="stat-cards-grid">
+        <!-- Card 1: Total Blood Units -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper icon-red">
+            🩸
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Total Blood Units</div>
+            <div class="stat-value" id="card-total-units">118</div>
+            <div class="stat-subtext text-red">Across all blood groups</div>
+          </div>
+        </div>
+
+        <!-- Card 2: Pending Requests -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper icon-green">
+            📋
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Pending Requests</div>
+            <div class="stat-value" id="card-pending-reqs">4</div>
+            <div class="stat-subtext text-green">Waiting for approval</div>
+          </div>
+        </div>
+
+        <!-- Card 3: Transfer Requests -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper icon-blue">
+            ⇄
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Transfer Requests</div>
+            <div class="stat-value" id="card-transfers">2</div>
+            <div class="stat-subtext text-blue">Incoming / Outgoing</div>
+          </div>
+        </div>
+
+        <!-- Card 4: Expiring Soon -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper icon-yellow">
+            📅
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Expiring Soon</div>
+            <div class="stat-value" id="card-expiring">6</div>
+            <div class="stat-subtext text-yellow">Within next 7 days</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle Row (2 Columns) -->
+      <div class="content-grid-2">
+        
+        <!-- Left: Blood Inventory -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon">🩸</span>
+              <span class="card-title">BLOOD INVENTORY</span>
+            </div>
+            <button class="card-action-btn" onclick="openAddModal()">View All</button>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="custom-table" id="inv-table">
+                <thead>
+                  <tr>
+                    <th>Blood Group</th>
+                    <th class="text-center">Available Units</th>
+                    <th class="text-center">Reserved Units</th>
+                    <th class="text-center">Expiring Soon</th>
+                  </tr>
+                </thead>
+                <tbody id="inv-tbody">
+                  <!-- Dynamic Inventory Rows -->
+                </tbody>
+                <tfoot id="inv-tfoot">
+                  <tr>
+                    <td>TOTAL</td>
+                    <td class="text-center" id="inv-tot-avail">96</td>
+                    <td class="text-center" id="inv-tot-res">13</td>
+                    <td class="text-center" id="inv-tot-exp">6</td>
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Recent Requests -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon">📥</span>
+              <span class="card-title">RECENT REQUESTS</span>
+            </div>
+          </div>
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="custom-table" id="req-table">
+                <thead>
+                  <tr>
+                    <th>Request ID</th>
+                    <th>Hospital / Node</th>
+                    <th class="text-center">Blood Group</th>
+                    <th class="text-center">Units</th>
+                    <th class="text-center">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="req-tbody">
+                  <!-- Dynamic Request Rows -->
+                </tbody>
+              </table>
+            </div>
+            <div class="table-footer-btn-wrapper">
+              <button class="table-footer-btn" onclick="openRequestsModal()">View All Requests</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Row (2 Columns) -->
+      <div class="content-grid-2">
+        
+        <!-- Left: Node Information -->
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon">▦</span>
+              <span class="card-title">NODE INFORMATION</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="info-list">
+              <div class="info-item">
+                <span class="info-label">Node Name</span>
+                <span class="info-sep">:</span>
+                <span class="info-value" id="info-node-name">Blood Bank A</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">IP Address</span>
+                <span class="info-sep">:</span>
+                <span class="info-value" id="info-node-ip">192.168.1.2</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Port</span>
+                <span class="info-sep">:</span>
+                <span class="info-value" id="info-node-port">5001</span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Status</span>
+                <span class="info-sep">:</span>
+                <span class="info-value">
+                  <span class="status-badge-green" id="info-status-pill">ONLINE</span>
+                </span>
+              </div>
+              <div class="info-item">
+                <span class="info-label">Last Updated</span>
+                <span class="info-sep">:</span>
+                <span class="info-value" id="info-last-updated">20 May 2024 10:30:45 AM</span>
+              </div>
+            </div>
+            
+            <div style="display:flex; gap:10px; margin-top:20px; border-top:1px solid #F3F4F6; padding-top:14px;">
+              <button class="btn-secondary" style="font-size:11.5px;" onclick="toggleOnline()">Toggle Failure</button>
+              <button class="btn-secondary" style="font-size:11.5px;" onclick="triggerElection()">Trigger Bully Election</button>
+              <button class="btn-primary" style="font-size:11.5px;" onclick="openTransferModal()">Peer Transfer</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Recent Communication Log -->
+        <div class="card" id="comm-card">
+          <div class="card-header">
+            <div class="card-title-group">
+              <span class="card-title-icon">💬</span>
+              <span class="card-title">RECENT COMMUNICATION LOG</span>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="comm-log-feed" id="comm-feed">
+              <!-- Dynamic Communication Lines -->
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============================================================== MODALS -->
+
+<!-- Modal: Add Blood Units -->
+<div class="modal-backdrop" id="modal-add-stock">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3>Add Blood Units to Inventory</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-add-stock')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group-field">
+        <label>Blood Group</label>
+        <select id="modal-add-bg" class="form-select">
+          <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+        </select>
+      </div>
+      <div class="form-group-field">
+        <label>Number of Units to Add</label>
+        <input id="modal-add-units" class="form-input" type="number" value="5" min="1">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-add-stock')">Cancel</button>
+      <button class="btn-primary" onclick="submitAddStock()">Add Units</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Transfer Blood Units -->
+<div class="modal-backdrop" id="modal-transfer">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3>Peer-to-Peer Blood Transfer</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-transfer')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group-field">
+        <label>Target Peer Blood Bank</label>
+        <select id="tr-target" class="form-select"></select>
+      </div>
+      <div class="form-group-field">
+        <label>Blood Group</label>
+        <select id="tr-bg" class="form-select">
+          <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option><option>O+</option><option>O-</option>
+        </select>
+      </div>
+      <div class="form-group-field">
+        <label>Units to Transfer</label>
+        <input id="tr-units" class="form-input" type="number" value="2" min="1">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-transfer')">Cancel</button>
+      <button class="btn-primary" onclick="submitTransfer()">Send Transfer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: All Requests View -->
+<div class="modal-backdrop" id="modal-all-requests">
+  <div class="modal-dialog" style="max-width:650px;">
+    <div class="modal-header">
+      <h3>All Incoming Requests</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-all-requests')">✕</button>
+    </div>
+    <div class="modal-body p-0">
+      <div class="table-responsive" style="max-height:360px; overflow-y:auto;">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>From</th>
+              <th>Group</th>
+              <th>Units</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="modal-all-req-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-all-requests')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let loggedIn = false;
+const GROUPS_ORDER = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
+window.addEventListener('DOMContentLoaded', () => {
+  const bankTitle = `Blood Bank ${BANK_ID}`;
+  document.getElementById('login-title').textContent = `${bankTitle} Node`;
+  document.getElementById('login-sub').textContent = `Distributed Blood Network · Node: BANK ${BANK_ID}`;
+  document.getElementById('login-user').value = BANK_ID.toLowerCase();
+  document.getElementById('login-hint').textContent = `Demo credential — username "${BANK_ID.toLowerCase()}", any password`;
+  
+  document.getElementById('hdr-node-sub').textContent = bankTitle;
+  document.getElementById('welcome-sub').textContent = `Welcome to Blood Bank Node - ${bankTitle}`;
+  document.getElementById('user-display-name').textContent = `BB_${BANK_ID}_Officer`;
+  document.getElementById('info-node-name').textContent = bankTitle;
+  document.getElementById('info-node-port').textContent = BANK_PORT || '5001';
+  document.getElementById('info-node-ip').textContent = '192.168.1.' + (BANK_ID === 'A' ? '2' : BANK_ID === 'B' ? '3' : '4');
+});
+
+async function login() {
+  const username = document.getElementById('login-user').value;
+  const password = document.getElementById('login-pass').value;
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-screen').style.display = 'block';
+      loggedIn = true;
+      buildTargetSelect();
+      refreshAll();
+      setInterval(refreshAll, 3000);
+    } else {
+      alert(d.error || 'Login failed');
+    }
+  } catch (err) {
+    alert('Connection error');
+  }
+}
+
+function buildTargetSelect() {
+  const sel = document.getElementById('tr-target');
+  if (sel && typeof PEERS !== 'undefined') {
+    sel.innerHTML = Object.keys(PEERS).map(p => `<option value="${p}">Blood Bank ${p}</option>`).join('');
+  }
+}
+
+function toggleSidebar() {
+  const sb = document.getElementById('app-sidebar');
+  sb.classList.toggle('mobile-open');
+}
+
+function switchTab(tab, el) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function openModal(id) {
+  document.getElementById(id).classList.add('show');
+}
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+function openAddModal() { openModal('modal-add-stock'); }
+function openTransferModal() { buildTargetSelect(); openModal('modal-transfer'); }
+function openRequestsModal() { openModal('modal-all-requests'); refreshAllRequestsModal(); }
+function openInventoryModal() { openAddModal(); }
+function scrollToLog() {
+  document.getElementById('comm-card').scrollIntoView({ behavior: 'smooth' });
+}
+function showReservedInfo() {
+  showToast('Reserved units are locked for verified hospital emergency requests.');
+}
+function showExpiringInfo() {
+  showToast('6 blood units will expire within the next 7 days.');
+}
+function openOtherNodesModal() {
+  showToast(`Connected peer nodes: ${Object.keys(PEERS || {}).map(p => 'Bank ' + p).join(', ') || 'None'}`);
+}
+function showProfile() {
+  showToast(`Logged in as BB_${BANK_ID}_Officer (${BANK_ID === 'A' ? 'Pune' : BANK_ID === 'B' ? 'Mumbai' : 'Nagpur'} Node)`);
+}
+function logout() {
+  location.reload();
+}
+
+async function refreshInventory() {
+  try {
+    const r = await fetch('/api/inventory');
+    if (r.status !== 200) return;
+    const rows = await r.json();
+    
+    // Sort rows by standard groups
+    const rowMap = {};
+    rows.forEach(x => rowMap[x.blood_group] = x);
+    
+    let totalAvail = 0;
+    let totalRes = 0;
+    let totalExp = 0;
+    
+    const html = GROUPS_ORDER.map(bg => {
+      const item = rowMap[bg] || { blood_group: bg, units: 0, reserved: 0, expiring: 0 };
+      const avail = item.units;
+      const res = item.reserved !== undefined ? item.reserved : Math.max(0, Math.floor(avail / 6));
+      const exp = item.expiring !== undefined ? item.expiring : Math.max(0, Math.floor(avail / 10));
+      
+      totalAvail += avail;
+      totalRes += res;
+      totalExp += exp;
+      
+      return `
+        <tr>
+          <td style="font-weight:600;">${bg}</td>
+          <td class="text-center" style="font-weight:600; cursor:pointer;" title="Click to edit" onclick="editStock('${bg}', ${avail})">${avail}</td>
+          <td class="text-center">${res}</td>
+          <td class="text-center">${exp}</td>
+        </tr>`;
+    }).join('');
+    
+    document.getElementById('inv-tbody').innerHTML = html;
+    document.getElementById('inv-tot-avail').textContent = totalAvail;
+    document.getElementById('inv-tot-res').textContent = totalRes;
+    document.getElementById('inv-tot-exp').textContent = totalExp;
+    
+    document.getElementById('card-total-units').textContent = totalAvail + totalRes;
+    document.getElementById('card-expiring').textContent = totalExp;
+  } catch (e) {}
+}
+
+async function editStock(bg, current) {
+  const v = prompt(`Set available stock for ${bg}:`, current);
+  if (v === null || isNaN(parseInt(v))) return;
+  await fetch('/api/inventory/update', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ blood_group: bg, units: parseInt(v) })
+  });
+  showToast(`Updated ${bg} stock to ${v} units`);
+  refreshInventory();
+  refreshLog();
+}
+
+async function submitAddStock() {
+  const bg = document.getElementById('modal-add-bg').value;
+  const units = parseInt(document.getElementById('modal-add-units').value);
+  if (!units || units <= 0) return;
+  await fetch('/api/inventory/add', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ blood_group: bg, units })
+  });
+  closeModal('modal-add-stock');
+  showToast(`Added ${units} units of ${bg} to inventory`);
+  refreshInventory();
+  refreshLog();
+}
+
+async function submitTransfer() {
+  const target = document.getElementById('tr-target').value;
+  const blood_group = document.getElementById('tr-bg').value;
+  const units = parseInt(document.getElementById('tr-units').value);
+  if (!target || !units) return;
+  
+  const r = await fetch('/api/transfer/send', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ target, blood_group, units })
+  });
+  const d = await r.json();
+  closeModal('modal-transfer');
+  if (d.ok) {
+    showToast(`Transferred ${units} units ${blood_group} to Blood Bank ${target}`);
+  } else {
+    alert(d.error || 'Transfer failed');
+  }
+  refreshInventory();
+  refreshLog();
+}
+
+async function refreshRequests() {
+  try {
+    const r = await fetch('/api/requests');
+    if (r.status !== 200) return;
+    const reqs = await r.json();
+    
+    const pendingCount = reqs.filter(x => x.status === 'PENDING').length;
+    document.getElementById('card-pending-reqs').textContent = pendingCount;
+    document.getElementById('sidebar-req-badge').textContent = pendingCount;
+    
+    const displayList = reqs.slice(0, 5);
+    const html = displayList.map(req => {
+      const isPending = req.status === 'PENDING';
+      const isApproved = req.status === 'FULFILLED' || req.status === 'APPROVED';
+      const statusBadge = isPending 
+        ? `<span class="badge-pill badge-pending">PENDING</span>`
+        : isApproved 
+        ? `<span class="badge-pill badge-approved">APPROVED</span>`
+        : `<span class="badge-pill badge-rejected">REJECTED</span>`;
+      
+      const reqCode = 'REQ' + (100 + req.id);
+      
+      return `
+        <tr>
+          <td style="font-weight:600;">${reqCode}</td>
+          <td>${req.hospital_name || 'City Hospital'}</td>
+          <td class="text-center" style="font-weight:600;">${req.blood_group}</td>
+          <td class="text-center">${req.units}</td>
+          <td class="text-center">
+            ${statusBadge}
+            ${isPending ? `
+              <div style="margin-top:4px; display:inline-flex; gap:4px;">
+                <button style="padding:2px 6px; font-size:10px; background:#10B981; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="respondReq(${req.id}, 'ACCEPT')">✓</button>
+                <button style="padding:2px 6px; font-size:10px; background:#EF4444; color:#fff; border:none; border-radius:4px; cursor:pointer;" onclick="respondReq(${req.id}, 'REJECT')">✕</button>
+              </div>` : ''}
+          </td>
+        </tr>`;
+    }).join('');
+    
+    document.getElementById('req-tbody').innerHTML = html || `<tr><td colspan="5" style="text-align:center; padding:18px; color:#9CA3AF;">No requests available</td></tr>`;
+  } catch (e) {}
+}
+
+async function refreshAllRequestsModal() {
+  try {
+    const r = await fetch('/api/requests');
+    const reqs = await r.json();
+    document.getElementById('modal-all-req-tbody').innerHTML = reqs.map(req => `
+      <tr>
+        <td>#${req.id}</td>
+        <td>${req.hospital_name}</td>
+        <td>${req.blood_group}</td>
+        <td>${req.units}</td>
+        <td><span class="badge-pill ${req.status==='PENDING'?'badge-pending':req.status==='FULFILLED'?'badge-approved':'badge-rejected'}">${req.status}</span></td>
+        <td>
+          ${req.status === 'PENDING' ? `
+            <button class="btn-primary" style="padding:3px 8px; font-size:11px;" onclick="respondReq(${req.id}, 'ACCEPT'); closeModal('modal-all-requests');">Accept</button>
+            <button class="btn-secondary" style="padding:3px 8px; font-size:11px;" onclick="respondReq(${req.id}, 'REJECT'); closeModal('modal-all-requests');">Reject</button>
+          ` : 'Done'}
+        </td>
+      </tr>
+    `).join('') || '<tr><td colspan="6" class="text-center p-3">No requests found.</td></tr>';
+  } catch(e) {}
+}
+
+async function respondReq(id, decision) {
+  const r = await fetch(`/api/requests/${id}/respond`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ decision })
+  });
+  const d = await r.json();
+  if (d.ok) {
+    showToast(`Request #${id} ${decision === 'ACCEPT' ? 'Approved & Fulfilled' : 'Rejected'}`);
+  } else {
+    alert(d.error || 'Action failed');
+  }
+  refreshRequests();
+  refreshInventory();
+  refreshLog();
+}
+
+async function toggleOnline() {
+  const r = await fetch('/api/toggle', { method: 'POST' });
+  const d = await r.json();
+  updateStatusDisplay(d.online);
+  showToast(`Blood Bank ${BANK_ID} is now ${d.online ? 'ONLINE' : 'OFFLINE'}`);
+}
+
+async function triggerElection() {
+  const r = await fetch('/api/election', { method: 'POST' });
+  const d = await r.json();
+  if (d.coordinator) {
+    showToast(`Node ${d.coordinator} WON Bully Election -> COORDINATOR`);
+  } else {
+    showToast('Bully Election message forwarded to higher ID peer');
+  }
+  refreshLog();
+}
+
+function updateStatusDisplay(online) {
+  const pill1 = document.getElementById('self-state-pill');
+  const pill2 = document.getElementById('info-status-pill');
+  if (online) {
+    pill1.textContent = 'ONLINE';
+    pill1.className = 'status-badge-green';
+    pill2.textContent = 'ONLINE';
+    pill2.className = 'status-badge-green';
+  } else {
+    pill1.textContent = 'OFFLINE';
+    pill1.className = 'status-badge-green offline';
+    pill2.textContent = 'OFFLINE';
+    pill2.className = 'status-badge-green offline';
+  }
+}
+
+async function refreshLog() {
+  try {
+    const r = await fetch('/api/logs');
+    const logs = await r.json();
+    const feed = document.getElementById('comm-feed');
+    if (logs && logs.length > 0) {
+      feed.innerHTML = logs.slice(0, 10).map(l => `
+        <div class="comm-log-item">
+          <div class="comm-time">${l.ts}</div>
+          <div class="comm-text">${l.message}</div>
+        </div>
+      `).join('');
+      
+      const now = new Date();
+      document.getElementById('info-last-updated').textContent = `20 May 2024 ${logs[0].ts}`;
+    }
+  } catch (e) {}
+}
+
+async function refreshStatus() {
+  try {
+    const r = await fetch('/api/status');
+    const d = await r.json();
+    updateStatusDisplay(d.online);
+  } catch (e) {}
+}
+
+function showToast(msg) {
+  const existing = document.querySelector('.app-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'app-toast';
+  t.innerHTML = `<span>ℹ️</span> <span>${msg}</span>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+function refreshAll() {
+  if (!loggedIn) return;
+  refreshInventory();
+  refreshRequests();
+  refreshLog();
+  refreshStatus();
+}
+</script>
+</body>
+</html>

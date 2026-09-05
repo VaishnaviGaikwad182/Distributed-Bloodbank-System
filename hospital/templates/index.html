@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hospital Node — Distributed Blood Network</title>
+<link rel="stylesheet" href="/static/style.css?v=2">
+<script src="/config.js"></script>
+</head>
+<body class="theme-hospital">
+
+<!-- ============================================================== LOGIN SCREEN -->
+<div id="login-screen" class="login-screen-wrap">
+  <div class="login-card-container">
+    <div class="login-logo-box" style="background-color: #DBEAFE; color: #2563EB;">
+      🏥
+    </div>
+    <h2>Hospital Node Terminal</h2>
+    <p class="subtitle">Distributed Blood Network · City Hospital</p>
+    
+    <div class="login-form-group">
+      <label>Username</label>
+      <input id="login-user" class="form-input" style="width:100%" value="hospital" autocomplete="off">
+    </div>
+    
+    <div class="login-form-group">
+      <label>Password</label>
+      <input id="login-pass" class="form-input" style="width:100%" type="password" value="hospital">
+    </div>
+    
+    <button class="login-btn-submit" onclick="login()">Sign In to Terminal</button>
+    <div class="login-demo-hint">Demo credential — username "hospital", password "hospital"</div>
+  </div>
+</div>
+
+<!-- ============================================================== APP SCREEN -->
+<div id="app-screen" style="display:none">
+  
+  <!-- Top Navigation Bar -->
+  <header class="top-header">
+    <div class="top-header-left">
+      <a href="#" class="logo-brand">
+        <div class="brand-icon-box" style="background: rgba(37, 99, 235, 0.3);">
+          🏥
+        </div>
+        <div class="brand-text">
+          <h1>HOSPITAL NODE</h1>
+          <span>City Hospital</span>
+        </div>
+      </a>
+      <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Toggle Menu">
+        ☰
+      </button>
+    </div>
+    
+    <div class="top-header-right">
+      <div class="node-status-pill">
+        <span class="status-dot-indicator"></span>
+        Node Status : <span class="status-badge-green" style="background-color: transparent; border:1px solid #10B981; color:#10B981; padding:1px 8px;">ONLINE</span>
+      </div>
+      
+      <div class="user-profile-header">
+        <div class="user-avatar-circle" style="background: rgba(255, 255, 255, 0.15);">
+          👤
+        </div>
+        <div class="user-info-text">
+          <div class="name">Dr. Priya Sharma</div>
+          <div class="role">Hospital Officer</div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Container (Sidebar + Content) -->
+  <div class="app-container">
+    
+    <!-- Left Sidebar -->
+    <aside class="sidebar" id="app-sidebar">
+      <nav class="sidebar-nav">
+        <a class="nav-item active" onclick="switchTab('dashboard', this)">
+          <span class="nav-icon">🏠</span>
+          <span>Dashboard</span>
+        </a>
+        <a class="nav-item" onclick="focusSearch()">
+          <span class="nav-icon">🔍</span>
+          <span>Search Blood</span>
+        </a>
+        <a class="nav-item" onclick="openEmergencyModal()">
+          <span class="nav-icon">🩸</span>
+          <span>Create Request</span>
+        </a>
+        <a class="nav-item" onclick="openRequestsModal()">
+          <span class="nav-icon">📋</span>
+          <span>My Requests</span>
+        </a>
+        <a class="nav-item" onclick="showReservedInfo()">
+          <span class="nav-icon">💧</span>
+          <span>Reserved Blood</span>
+        </a>
+        <a class="nav-item" onclick="showReceivedInfo()">
+          <span class="nav-icon">🚚</span>
+          <span>Received Blood</span>
+        </a>
+        <a class="nav-item" onclick="openDonorsModal()">
+          <span class="nav-icon">👥</span>
+          <span>Donor Directory</span>
+        </a>
+        <a class="nav-item" onclick="showAlerts()">
+          <span class="nav-icon">🔔</span>
+          <span>Notifications</span>
+          <span class="nav-badge">3</span>
+        </a>
+        <a class="nav-item" onclick="scrollToLog()">
+          <span class="nav-icon">💬</span>
+          <span>Communication Log</span>
+        </a>
+        <a class="nav-item" onclick="openNodesModal()">
+          <span class="nav-icon">⚯</span>
+          <span>Network Nodes</span>
+        </a>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <a class="nav-item" onclick="showProfile()">
+          <span class="nav-icon">👤</span>
+          <span>Profile</span>
+        </a>
+        <a class="nav-item" onclick="logout()">
+          <span class="nav-icon">⏻</span>
+          <span>Logout</span>
+        </a>
+      </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+      
+      <!-- Page Title -->
+      <div class="page-header">
+        <h2 style="text-transform: capitalize; font-size:22px; font-weight:700;">Dashboard</h2>
+        <p>Welcome to Hospital Node - City Hospital</p>
+      </div>
+
+      <!-- 4 Top Metric Cards -->
+      <div class="stat-cards-grid">
+        <!-- Card 1: Active Requests -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper icon-blue">
+            💧
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Active Requests</div>
+            <div class="stat-value" id="card-active-reqs">3</div>
+            <a href="javascript:void(0)" onclick="openRequestsModal()" class="stat-link link-blue">View all requests →</a>
+          </div>
+        </div>
+
+        <!-- Card 2: Reserved Blood -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper icon-green">
+            ✓
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Reserved Blood</div>
+            <div class="stat-value" id="card-reserved-units">7 <span style="font-size:14px; font-weight:500; color:#4B5563;">Units</span></div>
+            <div class="stat-subtext text-green">Across all groups</div>
+          </div>
+        </div>
+
+        <!-- Card 3: Received Blood -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper icon-yellow">
+            🚚
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Received Blood</div>
+            <div class="stat-value">12 <span style="font-size:14px; font-weight:500; color:#4B5563;">Units</span></div>
+            <div class="stat-subtext text-yellow">This Month</div>
+          </div>
+        </div>
+
+        <!-- Card 4: Registered Donors -->
+        <div class="stat-card">
+          <div class="stat-icon-wrapper icon-purple">
+            👥
+          </div>
+          <div class="stat-content">
+            <div class="stat-label">Registered Donors</div>
+            <div class="stat-value">256</div>
+            <a href="javascript:void(0)" onclick="openDonorsModal()" class="stat-link link-purple">View donors →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Middle Row (2 Columns) -->
+      <div class="content-grid-2">
+        
+        <!-- Left Column: Search & Blood Availability Across Banks -->
+        <div style="display:flex; flex-direction:column; gap:20px;">
+          
+          <!-- Search Blood Availability Widget -->
+          <div class="card" id="search-card">
+            <div class="card-body">
+              <div style="display:flex; align-items:center; gap:8px; margin-bottom:14px;">
+                <span style="color:#2563EB; font-size:16px;">🔍</span>
+                <span style="font-family:var(--font-heading); font-weight:700; font-size:14px; color:#111827;">Search Blood Availability</span>
+              </div>
+              <div class="search-widget-form">
+                <div class="form-group-field" style="max-width:130px;">
+                  <label>Blood Group</label>
+                  <select id="search-bg" class="form-select">
+                    <option value="A+">A+</option><option value="A-">A-</option>
+                    <option value="B+">B+</option><option value="B-">B-</option>
+                    <option value="AB+">AB+</option><option value="AB-">AB-</option>
+                    <option value="O+">O+</option><option value="O-" selected>O-</option>
+                  </select>
+                </div>
+                <div class="form-group-field" style="max-width:110px;">
+                  <label>Units Required</label>
+                  <select id="search-units" class="form-select">
+                    <option value="1">1</option><option value="2">2</option>
+                    <option value="3">3</option><option value="4">4</option>
+                    <option value="5" selected>5</option><option value="10">10</option>
+                  </select>
+                </div>
+                <div class="form-group-field">
+                  <label>Location (Optional)</label>
+                  <input id="search-location" class="form-input" type="text" value="Pune" placeholder="City or Region">
+                </div>
+                <button class="btn-search" onclick="doSearch()">Search</button>
+              </div>
+              <div id="search-quick-result" style="margin-top:12px; display:none;"></div>
+            </div>
+          </div>
+
+          <!-- Blood Availability Across Blood Banks Matrix -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-title-icon" style="color:#2563EB;">🩸</span>
+                <span class="card-title" style="text-transform:none; font-size:14px;">Blood Availability Across Blood Banks</span>
+              </div>
+              <button class="card-action-btn btn-outline" style="border-radius:4px; font-size:11px; padding:3px 10px;" onclick="refreshMatrix()">
+                🔄 Refresh
+              </button>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="custom-table" id="matrix-table">
+                  <thead>
+                    <tr>
+                      <th style="min-width:140px;">Blood Bank Node</th>
+                      <th class="text-center">A+</th>
+                      <th class="text-center">A-</th>
+                      <th class="text-center">B+</th>
+                      <th class="text-center">B-</th>
+                      <th class="text-center">AB+</th>
+                      <th class="text-center">AB-</th>
+                      <th class="text-center">O+</th>
+                      <th class="text-center">O-</th>
+                      <th style="min-width:120px;">Last Updated</th>
+                    </tr>
+                  </thead>
+                  <tbody id="matrix-tbody">
+                    <!-- Dynamic Bank Rows -->
+                  </tbody>
+                  <tfoot>
+                    <tr class="table-total-row-green">
+                      <td>Total Available</td>
+                      <td class="text-center" id="mat-tot-ap">35</td>
+                      <td class="text-center" id="mat-tot-an">12</td>
+                      <td class="text-center" id="mat-tot-bp">26</td>
+                      <td class="text-center" id="mat-tot-bn">9</td>
+                      <td class="text-center" id="mat-tot-abp">6</td>
+                      <td class="text-center" id="mat-tot-abn">2</td>
+                      <td class="text-center" id="mat-tot-op">43</td>
+                      <td class="text-center" id="mat-tot-on">7</td>
+                      <td></td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div style="padding:10px 16px; font-size:11px; color:#6B7280; background:#FBFBFC;">
+                * Availability shown is real-time from connected blood bank nodes.
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Column: Recent Requests & Communication Log -->
+        <div style="display:flex; flex-direction:column; gap:20px;">
+          
+          <!-- Recent Requests -->
+          <div class="card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-title-icon" style="color:#2563EB;">📋</span>
+                <span class="card-title" style="text-transform:none; font-size:14px;">Recent Requests</span>
+              </div>
+              <button class="card-action-btn btn-outline" style="border-radius:4px; font-size:11px; padding:3px 10px;" onclick="openRequestsModal()">
+                View All
+              </button>
+            </div>
+            <div class="card-body p-0">
+              <div class="table-responsive">
+                <table class="custom-table" id="hosp-req-table">
+                  <thead>
+                    <tr>
+                      <th>Request ID</th>
+                      <th class="text-center">Blood Group</th>
+                      <th class="text-center">Units</th>
+                      <th class="text-center">Priority</th>
+                      <th class="text-center">Status</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="hosp-req-tbody">
+                    <!-- Dynamic Requests -->
+                  </tbody>
+                </table>
+              </div>
+              <div style="padding:10px 16px; text-align:center; border-top:1px solid #F3F4F6;">
+                <a href="javascript:void(0)" onclick="openRequestsModal()" style="color:#2563EB; font-size:12px; font-weight:600; text-decoration:none;">
+                  View All Requests →
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent Communication Log -->
+          <div class="card" id="comm-card">
+            <div class="card-header">
+              <div class="card-title-group">
+                <span class="card-title-icon" style="color:#2563EB;">💬</span>
+                <span class="card-title" style="text-transform:none; font-size:14px;">Recent Communication Log</span>
+              </div>
+              <button class="card-action-btn btn-outline" style="border-radius:4px; font-size:11px; padding:3px 10px;" onclick="openFullLogModal()">
+                View All
+              </button>
+            </div>
+            <div class="card-body">
+              <div class="comm-log-feed" id="hosp-comm-feed">
+                <!-- Dynamic Log Lines -->
+              </div>
+              <div style="margin-top:12px; padding-top:8px; border-top:1px solid #F3F4F6; text-align:center;">
+                <a href="javascript:void(0)" onclick="openFullLogModal()" style="color:#2563EB; font-size:12px; font-weight:600; text-decoration:none;">
+                  View Full Communication Log →
+                </a>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- Bottom Alerts Banner -->
+      <div class="alerts-banner">
+        <div class="alerts-content">
+          <div class="alerts-title">
+            <span>🔔</span>
+            <span>Alerts</span>
+          </div>
+          <div class="alerts-items">
+            <span>• O- blood is low in your network</span>
+            <span>• Blood Bank B reported low stock for B- and O-</span>
+          </div>
+        </div>
+        <button class="btn-view-alerts" onclick="showAlerts()">View All Alerts</button>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- ============================================================== MODALS -->
+
+<!-- Modal: Create Emergency / Normal Request -->
+<div class="modal-backdrop" id="modal-emergency">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3>Broadcast Blood Request</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-emergency')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group-field">
+        <label>Blood Group Needed</label>
+        <select id="em-bg" class="form-select">
+          <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option><option>O+</option><option selected>O-</option>
+        </select>
+      </div>
+      <div class="form-group-field">
+        <label>Units Needed</label>
+        <input id="em-units" class="form-input" type="number" value="5" min="1">
+      </div>
+      <div class="form-group-field">
+        <label>Priority Level</label>
+        <select id="em-type" class="form-select">
+          <option value="CRITICAL">Critical (Immediate Emergency)</option>
+          <option value="HIGH">High (Urgent Surgery)</option>
+          <option value="NORMAL" selected>Normal</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-emergency')">Cancel</button>
+      <button class="btn-primary" onclick="sendEmergency()">Broadcast Request</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Reserve Instant Blood -->
+<div class="modal-backdrop" id="modal-reserve">
+  <div class="modal-dialog">
+    <div class="modal-header">
+      <h3>Instant Blood Reservation (Mutual Exclusion)</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-reserve')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group-field">
+        <label>Target Blood Bank</label>
+        <select id="res-bank-id" class="form-select">
+          <option value="A">Blood Bank A (Pune)</option>
+          <option value="B">Blood Bank B (Mumbai)</option>
+          <option value="C">Blood Bank C (Nagpur)</option>
+        </select>
+      </div>
+      <div class="form-group-field">
+        <label>Blood Group</label>
+        <select id="res-bg" class="form-select">
+          <option>A+</option><option>A-</option><option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option><option>O+</option><option selected>O-</option>
+        </select>
+      </div>
+      <div class="form-group-field">
+        <label>Units to Lock / Reserve</label>
+        <input id="res-units" class="form-input" type="number" value="2" min="1">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-reserve')">Cancel</button>
+      <button class="btn-primary" onclick="submitReserve()">Confirm Reservation</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Donors Directory -->
+<div class="modal-backdrop" id="modal-donors">
+  <div class="modal-dialog" style="max-width:560px;">
+    <div class="modal-header">
+      <h3>Registered Blood Donors Directory</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-donors')">✕</button>
+    </div>
+    <div class="modal-body p-0">
+      <div class="table-responsive" style="max-height:360px; overflow-y:auto;">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>Donor Name</th>
+              <th>Group</th>
+              <th>Location</th>
+              <th>Last Donated</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td>Rahul Deshmukh</td><td><b>O-</b></td><td>Pune</td><td>12 Apr 2024</td><td><span class="badge-pill badge-approved">Eligible</span></td></tr>
+            <tr><td>Sunita Patil</td><td><b>A+</b></td><td>Pune</td><td>28 Feb 2024</td><td><span class="badge-pill badge-approved">Eligible</span></td></tr>
+            <tr><td>Amit Kulkarni</td><td><b>B+</b></td><td>Mumbai</td><td>15 May 2024</td><td><span class="badge-pill badge-pending">Cooldown</span></td></tr>
+            <tr><td>Pooja Joshi</td><td><b>O+</b></td><td>Pune</td><td>10 Jan 2024</td><td><span class="badge-pill badge-approved">Eligible</span></td></tr>
+            <tr><td>Vikram Shinde</td><td><b>AB-</b></td><td>Nagpur</td><td>05 Mar 2024</td><td><span class="badge-pill badge-approved">Eligible</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-secondary" onclick="closeModal('modal-donors')">Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: All Requests -->
+<div class="modal-backdrop" id="modal-requests">
+  <div class="modal-dialog" style="max-width:680px;">
+    <div class="modal-header">
+      <h3>All Tracked Hospital Requests</h3>
+      <button class="modal-close-btn" onclick="closeModal('modal-requests')">✕</button>
+    </div>
+    <div class="modal-body p-0">
+      <div class="table-responsive" style="max-height:360px; overflow-y:auto;">
+        <table class="custom-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Bank</th>
+              <th>Group</th>
+              <th>Units</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="modal-req-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" onclick="openEmergencyModal(); closeModal('modal-requests');">+ New Request</button>
+      <button class="btn-secondary" onclick="closeModal('modal-requests')">Close</button>
+    </div>
+  </div>
+</div>
+
+<script>
+let loggedIn = false;
+const GROUPS_LIST = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+
+async function login() {
+  const username = document.getElementById('login-user').value;
+  const password = document.getElementById('login-pass').value;
+  try {
+    const r = await fetch('/api/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const d = await r.json();
+    if (d.ok) {
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('app-screen').style.display = 'block';
+      loggedIn = true;
+      refreshAll();
+      setInterval(refreshAll, 3000);
+    } else {
+      alert(d.error || 'Login failed');
+    }
+  } catch (e) {
+    alert('Connection error');
+  }
+}
+
+function toggleSidebar() {
+  document.getElementById('app-sidebar').classList.toggle('mobile-open');
+}
+
+function switchTab(t, el) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  if (el) el.classList.add('active');
+}
+
+function openModal(id) { document.getElementById(id).classList.add('show'); }
+function closeModal(id) { document.getElementById(id).classList.remove('show'); }
+function openEmergencyModal() { openModal('modal-emergency'); }
+function openReserveModal() { openModal('modal-reserve'); }
+function openDonorsModal() { openModal('modal-donors'); }
+function openRequestsModal() { openModal('modal-requests'); refreshTrack(); }
+function focusSearch() { document.getElementById('search-card').scrollIntoView({ behavior: 'smooth' }); }
+function scrollToLog() { document.getElementById('comm-card').scrollIntoView({ behavior: 'smooth' }); }
+function openFullLogModal() { scrollToLog(); showToast('Viewing live hospital communication event feed'); }
+function showReservedInfo() { showToast('7 Units currently reserved across connected blood bank nodes.'); }
+function showReceivedInfo() { showToast('12 Units received this month from verified transfers.'); }
+function openNodesModal() { showToast('Connected nodes: Blood Bank A (Pune), Blood Bank B (Mumbai), Blood Bank C (Nagpur)'); }
+function showAlerts() { showToast('Network Alert: O- blood supply is currently below threshold levels.'); }
+function showProfile() { showToast('Officer: Dr. Priya Sharma | City Hospital Emergency Node'); }
+function logout() { location.reload(); }
+
+async function doSearch() {
+  const bg = document.getElementById('search-bg').value;
+  const units = document.getElementById('search-units').value;
+  const loc = document.getElementById('search-location').value;
+  
+  try {
+    const r = await fetch(`/api/search/${encodeURIComponent(bg)}`);
+    const d = await r.json();
+    const qBox = document.getElementById('search-quick-result');
+    qBox.style.display = 'block';
+    
+    let html = `
+      <div style="background:#F0FDF4; border:1px solid #BBF7D0; border-radius:6px; padding:10px 14px; font-size:12.5px;">
+        <div style="display:flex; justify-content:space-between; margin-bottom:6px; font-weight:700; color:#166534;">
+          <span>Found ${d.total} units of ${bg} across connected banks:</span>
+          <span style="cursor:pointer;" onclick="document.getElementById('search-quick-result').style.display='none'">✕</span>
+        </div>
+        <div style="display:flex; gap:12px; flex-wrap:wrap;">
+    `;
+    
+    d.results.forEach(res => {
+      html += `
+        <div style="background:#fff; border:1px solid #E5E7EB; border-radius:4px; padding:6px 10px; display:flex; align-items:center; gap:8px;">
+          <span>Bank ${res.bank_id}: <b>${res.units} units</b></span>
+          ${res.online && res.units >= parseInt(units) ? `
+            <button class="btn-primary" style="padding:2px 8px; font-size:10px;" onclick="instantReserve('${res.bank_id}', '${bg}', ${units})">Reserve</button>
+          ` : ''}
+        </div>
+      `;
+    });
+    
+    html += `</div></div>`;
+    qBox.innerHTML = html;
+  } catch (e) {}
+}
+
+async function instantReserve(bankId, bg, units) {
+  const r = await fetch('/api/reserve', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ bank_id: bankId, blood_group: bg, units: parseInt(units) })
+  });
+  const d = await r.json();
+  if (d.reserved) {
+    showToast(`Successfully reserved ${units} units of ${bg} from Blood Bank ${bankId}!`);
+  } else {
+    alert(d.error || 'Reservation failed — insufficient stock');
+  }
+  refreshAll();
+}
+
+async function submitReserve() {
+  const bankId = document.getElementById('res-bank-id').value;
+  const bg = document.getElementById('res-bg').value;
+  const units = parseInt(document.getElementById('res-units').value);
+  closeModal('modal-reserve');
+  instantReserve(bankId, bg, units);
+}
+
+async function sendEmergency() {
+  const blood_group = document.getElementById('em-bg').value;
+  const units = parseInt(document.getElementById('em-units').value);
+  const req_type = document.getElementById('em-type').value;
+  
+  const r = await fetch('/api/emergency', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ blood_group, units, req_type })
+  });
+  const d = await r.json();
+  closeModal('modal-emergency');
+  if (d.sent_to && d.sent_to.length > 0) {
+    showToast(`Emergency Broadcast sent to banks: ${d.sent_to.join(', ')}`);
+  } else {
+    alert('No blood banks currently reachable');
+  }
+  refreshAll();
+}
+
+async function refreshMatrix() {
+  try {
+    const r = await fetch('/api/inventory/matrix');
+    if (r.status !== 200) return;
+    const data = await r.json();
+    
+    const rowsHtml = data.rows.map(row => {
+      return `
+        <tr>
+          <td style="font-weight:600;">${row.node_name}</td>
+          <td class="text-center">${row.counts['A+'] || 0}</td>
+          <td class="text-center">${row.counts['A-'] || 0}</td>
+          <td class="text-center">${row.counts['B+'] || 0}</td>
+          <td class="text-center">${row.counts['B-'] || 0}</td>
+          <td class="text-center">${row.counts['AB+'] || 0}</td>
+          <td class="text-center">${row.counts['AB-'] || 0}</td>
+          <td class="text-center">${row.counts['O+'] || 0}</td>
+          <td class="text-center">${row.counts['O-'] || 0}</td>
+          <td style="font-size:11px; color:#6B7280;">${row.last_updated}</td>
+        </tr>
+      `;
+    }).join('');
+    
+    document.getElementById('matrix-tbody').innerHTML = rowsHtml;
+    
+    document.getElementById('mat-tot-ap').textContent = data.totals['A+'] || 0;
+    document.getElementById('mat-tot-an').textContent = data.totals['A-'] || 0;
+    document.getElementById('mat-tot-bp').textContent = data.totals['B+'] || 0;
+    document.getElementById('mat-tot-bn').textContent = data.totals['B-'] || 0;
+    document.getElementById('mat-tot-abp').textContent = data.totals['AB+'] || 0;
+    document.getElementById('mat-tot-abn').textContent = data.totals['AB-'] || 0;
+    document.getElementById('mat-tot-op').textContent = data.totals['O+'] || 0;
+    document.getElementById('mat-tot-on').textContent = data.totals['O-'] || 0;
+  } catch (e) {}
+}
+
+async function refreshTrack() {
+  try {
+    const r = await fetch('/api/track');
+    if (r.status !== 200) return;
+    const rows = await r.json();
+    
+    document.getElementById('card-active-reqs').textContent = rows.filter(x => x.status === 'PENDING' || x.status === 'SEARCHING').length || rows.length;
+    
+    const displayList = rows.slice(0, 4);
+    const html = displayList.map(req => {
+      const p = req.req_type || 'NORMAL';
+      const pBadge = p === 'CRITICAL' || p === 'EMERGENCY'
+        ? `<span class="badge-pill badge-critical">CRITICAL</span>`
+        : p === 'HIGH'
+        ? `<span class="badge-pill badge-high">HIGH</span>`
+        : `<span class="badge-pill badge-normal">NORMAL</span>`;
+        
+      const s = req.status || 'PENDING';
+      const sBadge = s === 'RESERVED' || s === 'FULFILLED'
+        ? `<span class="badge-pill badge-approved">RESERVED</span>`
+        : s === 'SEARCHING'
+        ? `<span class="badge-pill badge-searching">SEARCHING</span>`
+        : `<span class="badge-pill badge-pending">PENDING</span>`;
+        
+      const reqId = 'REQ' + (req.id < 100 ? (1000 + req.id) : req.id);
+      
+      return `
+        <tr>
+          <td style="font-weight:600;">${reqId}</td>
+          <td class="text-center" style="font-weight:600;">${req.blood_group}</td>
+          <td class="text-center">${req.units}</td>
+          <td class="text-center">${pBadge}</td>
+          <td class="text-center">${sBadge}</td>
+          <td style="font-size:11px; color:#6B7280;">${req.created_at || '20 May 2024 10:15 AM'}</td>
+        </tr>
+      `;
+    }).join('');
+    
+    document.getElementById('hosp-req-tbody').innerHTML = html || `<tr><td colspan="6" class="text-center p-3">No active requests</td></tr>`;
+    
+    const modalHtml = rows.map(req => `
+      <tr>
+        <td>#${req.id}</td>
+        <td>Bank ${req.bank_id}</td>
+        <td><b>${req.blood_group}</b></td>
+        <td>${req.units}</td>
+        <td><span class="badge-pill ${req.req_type==='CRITICAL'?'badge-critical':'badge-normal'}">${req.req_type}</span></td>
+        <td><span class="badge-pill ${req.status==='RESERVED'?'badge-approved':'badge-pending'}">${req.status}</span></td>
+        <td>${req.created_at}</td>
+      </tr>
+    `).join('');
+    document.getElementById('modal-req-tbody').innerHTML = modalHtml;
+  } catch (e) {}
+}
+
+async function refreshLog() {
+  try {
+    const r = await fetch('/api/logs');
+    const logs = await r.json();
+    const feed = document.getElementById('hosp-comm-feed');
+    if (logs && logs.length > 0) {
+      feed.innerHTML = logs.slice(0, 6).map(l => {
+        const isSent = l.message.toLowerCase().includes('search request') || l.message.toLowerCase().includes('broadcast');
+        const tag = isSent 
+          ? `<span class="comm-tag comm-tag-sent">SENT</span>`
+          : `<span class="comm-tag comm-tag-received">RECEIVED</span>`;
+        return `
+          <div class="comm-log-item">
+            <div class="comm-time">${l.ts}</div>
+            ${tag}
+            <div class="comm-text">${l.message}</div>
+          </div>
+        `;
+      }).join('');
+    }
+  } catch (e) {}
+}
+
+function showToast(msg) {
+  const existing = document.querySelector('.app-toast');
+  if (existing) existing.remove();
+  const t = document.createElement('div');
+  t.className = 'app-toast';
+  t.innerHTML = `<span>ℹ️</span> <span>${msg}</span>`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+
+function refreshAll() {
+  if (!loggedIn) return;
+  refreshMatrix();
+  refreshTrack();
+  refreshLog();
+}
+</script>
+</body>
+</html>
