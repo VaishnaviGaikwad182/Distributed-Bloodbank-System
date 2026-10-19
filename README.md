@@ -78,8 +78,3 @@ Then open:
   - **Coordinator propagation**: once a new leader is elected, the coordinator is broadcast to peers and surfaces in the status endpoints.
   - **Distributed state tracking**: logs, request status, and bank availability are aggregated centrally by the Admin dashboard.
 
-## Notes
-
-- This uses Flask's built-in dev server, which is fine for a local/classroom demo but is not meant for production traffic.
-- Each node is independent — if a bank process is stopped or toggled offline, the remaining nodes keep working correctly.
-- The system is designed to demonstrate distributed behavior in a simple, readable way rather than as a production-grade distributed system.
