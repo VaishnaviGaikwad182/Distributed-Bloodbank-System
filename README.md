@@ -1,4 +1,4 @@
-# Distributed Blood Bank Availability System
+# Distributed Blood Bank System
 
 A working reference implementation of the spec: 1 Hospital node + 3 independent
 Blood Bank nodes + 1 Admin dashboard, each running as a separate Flask process
@@ -7,6 +7,23 @@ with its own SQLite database and communicating over REST.
 This project includes the core distributed-system features as well as the
 implementation details for clocking, leader election, mutual exclusion, and
 failure handling.
+
+<img width="1895" height="867" alt="image" src="https://github.com/user-attachments/assets/c3fd8558-c6ae-41fc-8409-c12e2aa01913" />
+<img width="1901" height="866" alt="image" src="https://github.com/user-attachments/assets/6b6c9050-f695-4c0b-a57e-06a608a3d187" />
+<img width="1902" height="857" alt="image" src="https://github.com/user-attachments/assets/37235c63-1d38-4ea1-8a4f-f328136ccb74" />
+<img width="1897" height="862" alt="image" src="https://github.com/user-attachments/assets/aff9e0f8-42a9-4091-84f0-b2f530d5e012" />
+<img width="1900" height="868" alt="image" src="https://github.com/user-attachments/assets/db286a8c-2851-48be-b04f-6a87aebfc480" />
+<img width="1897" height="867" alt="image" src="https://github.com/user-attachments/assets/d46f33f0-0505-4f4f-810c-c8798f7f8640" />
+<img width="1896" height="868" alt="image" src="https://github.com/user-attachments/assets/b567ff4c-fd2e-4947-bfd6-ab9a6d1a1681" />
+<img width="1902" height="863" alt="image" src="https://github.com/user-attachments/assets/f6b10161-81d0-4145-83bd-a34f1c67c406" />
+<img width="1896" height="860" alt="image" src="https://github.com/user-attachments/assets/f1bbea2f-c767-48c3-972f-7964d842da95" />
+<img width="1897" height="865" alt="image" src="https://github.com/user-attachments/assets/ee3464af-c142-436b-802f-470a31708387" />
+<img width="1891" height="862" alt="image" src="https://github.com/user-attachments/assets/628fa42d-bae6-4415-a30c-db27c66f7a7c" />
+<img width="1900" height="872" alt="image" src="https://github.com/user-attachments/assets/fcd28131-bff3-48ae-9a2d-93a8d7f02470" />
+<img width="1896" height="871" alt="image" src="https://github.com/user-attachments/assets/d68dfc5f-7da9-4f7f-bc12-9968054862c8" />
+<img width="1891" height="861" alt="image" src="https://github.com/user-attachments/assets/cde1e909-6a78-454f-b085-3e79d8e42bc0" />
+<img width="1897" height="862" alt="image" src="https://github.com/user-attachments/assets/3d49e95f-765e-4793-8cc0-3742ad126d37" />
+
 
 ## Nodes
 
